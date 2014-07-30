@@ -12,6 +12,8 @@ module Agents
       Set `expected_receive_period_in_days` to the maximum amount of time that you'd expect to pass between Events being received by this Agent.
     MD
 
+	self.validate :validate_sms_options
+
     def default_options
       {
           'subject' => "You have a notification!",
@@ -44,7 +46,7 @@ module Agents
 
     def receive(incoming_events)
       incoming_events.each do |event|
-        log "Sending digest mail to #{email_address} with event #{event.id}"
+        log "Sending SMS to #{email_address} with event #{event.id}"
         SystemMailer.delay.send_message(:to => "#{email_address}", :subject => interpolated(event.payload)['subject'], :groups => [present(event.payload)])
       end
     end
