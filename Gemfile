@@ -81,6 +81,9 @@ group :development do
   gem 'binding_of_caller'
   gem 'better_errors'
   gem 'quiet_assets'
+  gem 'capistrano', '~> 2.15.5'
+  gem 'capistrano-unicorn', '~> 0.1.9', :require => false
+  gem 'rvm-capistrano', '~> 1.4.1'
 end
 
 group :development, :test do
@@ -113,4 +116,3 @@ else
   gem 'unicorn', platform: :ruby_18
   gem 'rails_12factor', platform: :ruby_18
 end
-
