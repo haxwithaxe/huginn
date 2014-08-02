@@ -24,3 +24,6 @@ deployment/cookbooks
 .*un~
 .ruby-gemset
 .ruby-version
+config/deploy.rb
+config/unicorn/*
+shared/*
