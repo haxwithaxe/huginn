@@ -4,14 +4,15 @@
 
 default_run_options[:pty] = true
 
+set :port, 60022
 set :application, "huginn"
-set :deploy_to, "/home/you/app"
-set :user, "you"
+set :deploy_to, "/home/huginn/huginn"
+set :user, "huginn"
 set :use_sudo, false
 set :scm, :git
 set :rails_env, 'production'
-set :repository, "git@github.com:you/huginn-private.git"
-set :branch, ENV['BRANCH'] || "master"
+set :repository, "git@github.com:haxwithaxe/huginn.git"
+set :branch, ENV['BRANCH'] || "production"
 set :deploy_via, :remote_cache
 set :keep_releases, 5
 
@@ -19,7 +20,7 @@ puts "    Deploying #{branch}"
 
 set :bundle_without, [:development]
 
-server "yourdomain.com", :app, :web, :db, :primary => true
+server "huginn.urlw.us", :app, :web, :db, :primary => true
 
 set :sync_backups, 3
 
@@ -30,6 +31,7 @@ set :bundle_without, [:development, :test]
 
 after 'deploy:update_code', 'deploy:symlink_configs'
 after 'deploy:update', 'foreman:export'
+after 'deploy:update', 'foreman:enable'
 after 'deploy:update', 'foreman:restart'
 
 namespace :deploy do
@@ -45,6 +47,7 @@ namespace :deploy do
   end
 end
 
+=begin
 namespace :foreman do
   desc "Export the Procfile to Ubuntu's upstart scripts"
   task :export, :roles => :app do
@@ -64,6 +67,34 @@ namespace :foreman do
   desc 'Restart the application services'
   task :restart, :roles => :app do
     run "sudo start #{application} || sudo restart #{application}"
+  end
+end
+=end
+
+namespace :foreman do
+  desc "Export the Procfile to systemd scripts"
+  task :export, :roles => :app do
+    run "cd #{latest_release} && rvmsudo bundle exec foreman export systemd /etc/systemd/system -a #{application} -u #{user} -l #{deploy_to}/systemd_logs"
+  end
+
+  desc 'Enable the service in systemd'
+  task :enable, :roles => :app do
+    sudo "sudo systemctl enable #{application}.target"
+  end
+
+  desc 'Start the application services'
+  task :start, :roles => :app do
+    sudo "sudo systemctl start #{application}"
+  end
+
+  desc 'Stop the application services'
+  task :stop, :roles => :app do
+    sudo "sudo systemctl stop #{application}"
+  end
+
+  desc 'Restart the application services'
+  task :restart, :roles => :app do
+    run "sudo systemctl start #{application} || sudo systemctl restart #{application}"
   end
 end
 
